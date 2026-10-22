@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#1a0d2e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Феи">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Lobster&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<title>Феи</title>
+<style>
+:root{
+  --bg:#1a0d2e;--glass:rgba(38,20,62,.68);--glass2:rgba(50,26,80,.86);--line:rgba(255,255,255,.1);--line2:rgba(255,255,255,.2);
+  --text:#fff5fc;--muted:#d2bde8;--dim:#9c86b8;
+  --pink:#ff7ac8;--pink2:#ff4fa8;--lilac:#b892ff;--gold:#ffd27a;--mint:#6ff0c8;--sky:#7cd4ff;--red:#ff6b8b;--green:#5ef0a8;
+  --display:'Comfortaa','Segoe UI',system-ui,sans-serif;--body:'Nunito','Segoe UI',system-ui,-apple-system,Roboto,sans-serif;--script:'Lobster','Comfortaa',cursive;
+  --r:22px;--shadow:0 20px 60px rgba(10,0,30,.5),0 2px 0 rgba(255,255,255,.05) inset;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);-webkit-text-size-adjust:100%;min-height:100%}
+body{-webkit-tap-highlight-color:transparent;font-weight:700}
+button,input,select{font-family:inherit}
+::selection{background:var(--pink);color:#2a0820}
+
+/* ---------- живой сад на фоне меню ---------- */
+#demo{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0}
+#veil{position:fixed;inset:0;z-index:0;pointer-events:none;transition:opacity .6s;
+  background:radial-gradient(120% 90% at 50% 0%,rgba(26,13,46,.3),rgba(26,13,46,.86) 70%),linear-gradient(180deg,rgba(26,13,46,.5),rgba(26,13,46,.88))}
+body.scr-rules #veil{opacity:.4}
+body.scr-game #veil,body.scr-game #demo{display:none}
+#sparkles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+#sparkles i{position:absolute;width:6px;height:6px;border-radius:50%;background:#fff;box-shadow:0 0 10px 2px rgba(255,200,240,.9);opacity:0;animation:twinkle 4s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:0;transform:scale(.4)}50%{opacity:.9;transform:scale(1)}}
+body.scr-game #sparkles{display:none}
+
+/* ---------- экраны ---------- */
+.screen{display:none;position:relative;z-index:1;padding:max(14px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(28px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+  max-width:780px;margin:0 auto}
+.screen.active{display:block;animation:enter .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes enter{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.center{text-align:center}
+.sub{color:var(--muted);font-weight:700;margin:0 0 14px;line-height:1.5}
+h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:.01em;margin:0}
+.h-title{font-size:clamp(24px,5.5vw,32px);text-align:center;margin:6px 0 6px}
+
+/* логотип */
+.logo{display:flex;align-items:center;justify-content:center;gap:12px;margin:4px auto 2px;user-select:none}
+.logo svg{width:clamp(62px,14vw,88px);height:auto;filter:drop-shadow(0 8px 24px rgba(255,122,200,.45));animation:float 3.4s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-6px) rotate(-3deg)}}
+.logo-word{font-family:var(--script);font-weight:400;font-size:clamp(58px,15vw,96px);line-height:.95;letter-spacing:.02em;
+  background:linear-gradient(180deg,#fff 0%,#ffe1f4 30%,var(--pink) 62%,#c86bff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 6px 22px rgba(255,90,180,.4))}
+.logo-sub{font-family:var(--display);font-weight:700;font-size:clamp(10px,2.4vw,13px);letter-spacing:.38em;color:var(--muted);margin-top:4px;padding-left:.2em}
+.logo.small svg{width:46px}.logo.small .logo-word{font-size:40px}.logo.small .logo-sub{display:none}
+
+/* этапы */
+.steps{display:flex;align-items:center;justify-content:center;margin:56px auto 14px;max-width:420px}
+.step{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim);font-weight:800;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.step i{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-family:var(--display);font-size:12px;
+  border:1px solid var(--line2);background:rgba(255,255,255,.04);color:var(--muted)}
+.step.on{color:var(--text)}.step.on i{background:linear-gradient(180deg,#ffb3e0,var(--pink2));border-color:transparent;color:#fff;box-shadow:0 0 0 4px rgba(255,122,200,.2)}
+.step.done{color:var(--muted)}.step.done i{background:rgba(94,240,168,.14);border-color:rgba(94,240,168,.45);color:var(--green)}
+.steps .bar{flex:1;height:1px;background:linear-gradient(90deg,var(--line2),var(--line));margin:0 10px;min-width:16px}
+
+/* стеклянные панели */
+.panel{background:var(--glass);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin:14px 0;box-shadow:var(--shadow);
+  -webkit-backdrop-filter:blur(16px) saturate(150%);backdrop-filter:blur(16px) saturate(150%)}
+.panel h3{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;font-weight:700}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.row.center{justify-content:center}
+.lbl{display:flex;flex-direction:column;gap:7px;color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:800}
+
+/* кнопки */
+.btn{position:relative;overflow:hidden;padding:13px 20px;font-size:15px;border:1px solid var(--line2);border-radius:16px;cursor:pointer;color:var(--text);
+  background:rgba(255,255,255,.06);font-weight:900;touch-action:manipulation;transition:transform .15s,filter .2s,background .2s,box-shadow .2s;letter-spacing:.01em}
+.btn:hover{background:rgba(255,255,255,.11);transform:translateY(-1px)}
+.btn:active{transform:translateY(1px) scale(.98)}
+.btn:disabled{opacity:.4;cursor:default;transform:none}
+.btn.primary{background:linear-gradient(180deg,#ffb6e1,var(--pink) 45%,#c76bff);color:#fff;border-color:rgba(255,200,235,.6);text-shadow:0 1px 2px rgba(120,0,80,.35);
+  box-shadow:0 10px 30px rgba(255,79,168,.35),0 1px 0 rgba(255,255,255,.6) inset}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.gold{background:linear-gradient(180deg,#fff0c2,var(--gold) 50%,#f0a640);color:#4a2a05;border-color:rgba(255,235,180,.7);box-shadow:0 10px 26px rgba(240,166,64,.3)}
+.btn.cta{font-family:var(--display);font-weight:700;font-size:clamp(17px,4.4vw,21px);padding:18px 26px;border-radius:20px;letter-spacing:.04em}
+.btn.cta::after,.btn.shine::after{content:"";position:absolute;inset:-40% auto -40% -60%;width:40%;transform:skewX(-20deg);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.6),transparent);animation:shine 3.2s ease-in-out infinite}
+@keyframes shine{0%,55%{left:-60%}85%,100%{left:130%}}
+.btn.wide{width:100%}
+.btn.ghost{background:transparent}
+.btn.small{padding:8px 12px;font-size:13px;border-radius:12px}
+
+/* поля */
+input[type=text],select{width:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--line2);background:rgba(16,6,30,.55);color:var(--text);
+  font-size:16px;font-weight:800;outline:none;transition:border-color .2s,box-shadow .2s}
+input[type=text]:focus,select:focus{border-color:rgba(255,122,200,.75);box-shadow:0 0 0 4px rgba(255,122,200,.16)}
+select{appearance:none;-webkit-appearance:none;padding-right:38px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23ff7ac8' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center}
+select option{background:#2a1645;color:var(--text)}
+label.chk{display:inline-flex;gap:10px;align-items:center;margin:4px 18px 4px 0;cursor:pointer;color:var(--text);font-weight:800;font-size:14px}
+label.chk input{appearance:none;-webkit-appearance:none;width:42px;height:24px;border-radius:20px;background:rgba(255,255,255,.12);border:1px solid var(--line2);position:relative;cursor:pointer;transition:background .2s;margin:0}
+label.chk input::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#e8d9f5;transition:transform .2s,background .2s}
+label.chk input:checked{background:linear-gradient(180deg,#ffb6e1,var(--pink2));border-color:transparent}
+label.chk input:checked::after{transform:translateX(18px);background:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+
+/* шаг 1: фея и гардероб */
+.fairy{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center}
+@media (max-width:560px){.fairy{grid-template-columns:1fr}.stage{margin:0 auto}}
+.stage{position:relative;width:210px;height:210px;border-radius:50%;
+  background:radial-gradient(circle at 50% 40%,rgba(255,220,245,.5),rgba(150,90,200,.55) 55%,rgba(40,18,70,.95) 72%);
+  box-shadow:0 0 0 1px var(--line2),0 0 0 9px rgba(255,255,255,.03),0 30px 60px rgba(10,0,30,.5),0 0 90px rgba(255,122,200,.22)}
+#preview{width:100%;height:100%;display:block}
+.fcol{display:flex;flex-direction:column;gap:16px;min-width:0}
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(32px,1fr));gap:8px}
+.sw{aspect-ratio:1;border-radius:50%;border:0;cursor:pointer;padding:0;position:relative;box-shadow:0 0 0 1px rgba(0,0,0,.25) inset,0 3px 10px rgba(0,0,0,.3);transition:transform .15s}
+.sw:hover{transform:scale(1.1)}
+.sw.on{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--pink),0 6px 18px rgba(0,0,0,.4)}
+.purse{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:30px;background:linear-gradient(180deg,rgba(255,210,122,.2),rgba(255,210,122,.08));
+  border:1px solid rgba(255,210,122,.45);color:var(--gold);font-family:var(--display);font-weight:700;font-size:15px;white-space:nowrap}
+.purse.bump{animation:bump .6s cubic-bezier(.2,.9,.25,1.4)}
+@keyframes bump{40%{transform:scale(1.25)}}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin:0 0 12px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;padding:9px 14px;border-radius:30px;border:1px solid var(--line2);background:rgba(255,255,255,.04);color:var(--muted);font-weight:900;font-size:13px;cursor:pointer;transition:background .2s,color .2s}
+.tab.on{background:linear-gradient(180deg,#ffb6e1,var(--pink2));color:#fff;border-color:transparent;box-shadow:0 6px 18px rgba(255,79,168,.3)}
+.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px}
+.item{position:relative;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.04);padding:8px 6px 9px;cursor:pointer;text-align:center;color:var(--text);
+  transition:transform .15s,border-color .2s,background .2s}
+.item:hover{transform:translateY(-2px);border-color:rgba(255,122,200,.45)}
+.item canvas{width:72px;height:72px;display:block;margin:0 auto 4px}
+.item .in{font-size:12.5px;font-weight:900;line-height:1.2}
+.item .ip{font-size:11.5px;color:var(--gold);font-weight:900;margin-top:3px}
+.item .ip.lock{color:var(--dim)}
+.item.on{border-color:var(--pink);background:rgba(255,122,200,.12);box-shadow:0 0 0 3px rgba(255,122,200,.18)}
+.item.on .ip{color:var(--green)}
+.item.locked canvas{filter:grayscale(.75) brightness(.7)}
+
+/* шаг 2: режимы */
+.modes{display:grid;gap:12px}
+.mode{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;text-align:left;padding:18px;border-radius:var(--r);
+  border:1px solid var(--line);background:var(--glass);color:var(--text);cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s;
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:var(--shadow);font-size:14px}
+button.mode:hover{transform:translateY(-2px);border-color:rgba(255,122,200,.5);box-shadow:var(--shadow),0 0 40px rgba(255,122,200,.16)}
+.mode .mi{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;font-size:28px}
+.mode .mt{font-family:var(--display);font-weight:700;font-size:17px;display:block;margin-bottom:5px}
+.mode .md{color:var(--muted);line-height:1.45;font-weight:700}
+.mode .chev{width:22px;height:22px;color:var(--muted)}
+.mi.g{background:linear-gradient(145deg,#8ff7d3,#22b88a);box-shadow:0 10px 26px rgba(80,230,180,.3)}
+.mi.b{background:linear-gradient(145deg,#ffb6e1,#e2429a);box-shadow:0 10px 26px rgba(255,90,180,.35)}
+.mi.v{background:linear-gradient(145deg,#cdb6ff,#7d4fe6);box-shadow:0 10px 26px rgba(150,110,255,.3)}
+.mode.join{grid-template-columns:auto 1fr;cursor:default}
+.joinrow{grid-column:1/-1;display:grid;grid-template-columns:1fr auto;gap:10px}
+#joinId{text-transform:uppercase;letter-spacing:.35em;font-family:var(--display);font-size:18px;text-align:center}
+details.panel summary{cursor:pointer;font-weight:900;font-size:15px;list-style:none;display:flex;align-items:center;gap:10px}
+details.panel summary::-webkit-details-marker{display:none}
+details.panel summary::after{content:"";margin-left:auto;width:9px;height:9px;border-right:2px solid var(--pink);border-bottom:2px solid var(--pink);transform:rotate(45deg);transition:transform .2s}
+details.panel[open] summary::after{transform:rotate(-135deg)}
+details.panel[open] summary{margin-bottom:16px}
+#serverInfo{color:var(--muted);font-size:13px;margin-bottom:12px;line-height:1.5}
+
+/* шаг 3: правила на фоне сада */
+#rules.active{max-width:none;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:14px}
+.rulesBox{max-width:640px;width:100%;margin:auto 0 0}
+.rulesBox .steps{margin:4px auto 14px}
+.rules{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.rules li{display:grid;grid-template-columns:32px 1fr;gap:10px;align-items:start;color:#eadcf6;font-size:14px;line-height:1.5;font-weight:700}
+.rules li b{color:#fff}
+.rules .ri{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:rgba(255,122,200,.14);border:1px solid rgba(255,122,200,.3);font-size:16px}
+.rulesBottom{width:100%;max-width:640px}
+.rulesBottom .row{display:grid;grid-template-columns:auto 1fr;gap:10px}
+
+/* статус связи */
+.netStatus{color:var(--muted);font-size:13px;margin:10px auto;min-height:16px;word-break:break-word;white-space:pre-line;line-height:1.5;text-align:center}
+.netStatus:not(:empty){background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:10px 12px;color:#f3e6fb;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+
+/* комната */
+.code{display:flex;justify-content:center;gap:8px;margin:8px 0 14px}
+.code span{width:clamp(40px,11vw,54px);height:clamp(52px,14vw,66px);border-radius:16px;display:grid;place-items:center;font-family:var(--display);font-weight:700;
+  font-size:clamp(22px,6vw,30px);background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.03));border:1px solid var(--line2);color:var(--pink);
+  box-shadow:0 10px 24px rgba(10,0,30,.35)}
+#joinLink{font-size:13px;background:rgba(16,6,30,.55);border:1px solid var(--line);border-radius:14px;padding:11px 12px;margin:0 0 12px;word-break:break-all;color:var(--muted);text-align:center;-webkit-user-select:all;user-select:all}
+#slotList{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.slot{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:16px;padding:8px 10px}
+.slot canvas{width:48px;height:48px;flex:none}
+.slot .nm{font-weight:900;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slot .st{color:var(--muted);font-size:12px;font-weight:800}
+.slot.me{border-color:rgba(255,122,200,.55);background:rgba(255,122,200,.09)}
+.slot.empty{border-style:dashed;opacity:.7}
+.tip{border-color:rgba(255,122,200,.38)!important;font-size:14px;line-height:1.55;color:#f1e3fa}
+#hostTries{margin-top:10px;color:var(--muted);font-size:13px}
+
+/* угол: кристаллы, задания, достижения; версия */
+#corner{position:fixed;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));z-index:15;display:flex;gap:8px;align-items:center}
+.ibtn{--s:clamp(38px,7vmin,46px);width:var(--s);height:var(--s);border-radius:15px;border:1px solid var(--line2);background:rgba(30,14,52,.62);color:#fff;
+  padding:0;cursor:pointer;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);touch-action:manipulation;display:grid;place-items:center;transition:background .2s,transform .15s;position:relative}
+.ibtn:hover{background:rgba(60,30,95,.8)}.ibtn:active{transform:scale(.94)}
+.ibtn svg{width:46%;height:46%}
+.ibtn.off{opacity:.45}
+.ibtn .dot{position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--pink2);color:#fff;font-size:11px;font-weight:900;display:none;place-items:center;box-shadow:0 0 0 2px var(--bg)}
+.ibtn .dot.show{display:grid}
+#corner .ibtn{--s:44px;font-size:20px}
+#ver{position:fixed;left:max(10px,env(safe-area-inset-left));bottom:max(8px,env(safe-area-inset-bottom));font-size:11px;color:var(--dim);z-index:15;pointer-events:none;letter-spacing:.08em;font-weight:800}
+.modal{position:fixed;inset:0;z-index:25;display:none;align-items:center;justify-content:center;background:rgba(14,4,28,.7);padding:14px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.modal.show{display:flex;animation:fade .25s}
+@keyframes fade{from{opacity:0}}
+.sheet{background:var(--glass2);border:1px solid var(--line2);border-radius:26px;padding:22px;max-width:560px;width:100%;max-height:100%;overflow:auto;box-shadow:var(--shadow);animation:pop .35s cubic-bezier(.2,.9,.25,1.2)}
+@keyframes pop{from{transform:scale(.92);opacity:0}}
+.sheet h2{text-align:center;font-size:clamp(22px,5vw,28px);margin-bottom:6px}
+.stat5{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 10px}
+.stat5 div{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;padding:10px 6px;text-align:center}
+.stat5 b{display:block;font-family:var(--display);font-size:18px;color:var(--pink)}
+.stat5 span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.list{display:grid;gap:8px}
+.ach{display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.ach .ai{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-size:19px;background:rgba(255,255,255,.06)}
+.ach.ok .ai{background:linear-gradient(145deg,#ffb6e1,#c76bff)}
+.ach .an{font-weight:900;font-size:14px}.ach .ad{font-size:12px;color:var(--muted)}
+.ach .ap{font-family:var(--display);font-size:12px;color:var(--muted);text-align:right}
+.ach.ok .ap{color:var(--green)}
+.ach .bar{height:5px;border-radius:4px;background:rgba(255,255,255,.08);margin-top:6px;overflow:hidden}
+.ach .bar i{display:block;height:100%;background:linear-gradient(90deg,#c76bff,var(--pink))}
+.questBonus{margin-top:12px;padding:12px;border-radius:16px;text-align:center;font-weight:900;background:linear-gradient(180deg,rgba(255,210,122,.16),rgba(255,210,122,.05));border:1px dashed rgba(255,210,122,.5);color:var(--gold)}
+#buyPrev{width:150px;height:150px;display:block;margin:4px auto 6px}
+
+/* ---------- полёт ---------- */
+#game.active{position:fixed;inset:0;max-width:none;margin:0;padding:0;background:#1a0d2e;touch-action:none;overscroll-behavior:none;z-index:5;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overflow:hidden;animation:none}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#topBtns{position:absolute;top:max(10px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));display:flex;gap:6px;z-index:3}
+#btnFlash{position:absolute;right:max(22px,calc(env(safe-area-inset-right) + 14px));bottom:max(22px,calc(env(safe-area-inset-bottom) + 14px));z-index:3;
+  --s:clamp(78px,18vmin,106px);--cd:1;width:var(--s);height:var(--s);border-radius:50%;border:0;padding:0;display:none;touch-action:none;
+  background:conic-gradient(var(--pink) calc(var(--cd)*360deg),rgba(255,255,255,.14) 0);box-shadow:0 12px 30px rgba(10,0,30,.45)}
+#btnFlash::before{content:"";position:absolute;inset:5px;border-radius:50%;background:radial-gradient(circle at 50% 35%,rgba(110,40,110,.95),rgba(36,12,48,.95));border:1px solid rgba(255,255,255,.12)}
+#btnFlash svg{position:relative;width:46%;height:46%;color:#ffd6f0;filter:drop-shadow(0 0 10px rgba(255,122,200,.85));transition:opacity .2s}
+#btnFlash.cd svg{opacity:.35;filter:none}
+body.touch #btnFlash{display:grid;place-items:center}
+#emotes{position:absolute;top:calc(max(10px,env(safe-area-inset-top)) + 54px);right:max(10px,env(safe-area-inset-right));z-index:4;display:none;flex-direction:column;gap:6px;
+  background:var(--glass2);border:1px solid var(--line2);padding:8px;border-radius:18px;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+#emotes.show{display:flex;animation:pop .2s}
+#emotes button{font-size:14px;padding:9px 14px;text-align:left}
+#roundEnd,#pauseBox{position:absolute;inset:0;z-index:5;display:none;align-items:center;justify-content:center;background:rgba(14,4,28,.5);padding:12px;
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+#roundEnd.show,#pauseBox.show{display:flex;animation:fade .3s}
+#roundEnd .sheet{text-align:center;max-width:600px}
+.re-kicker{font-family:var(--display);font-size:11px;letter-spacing:.35em;color:var(--muted);text-transform:uppercase}
+#reTitle{font-family:var(--script);font-weight:400;font-size:clamp(34px,8vw,48px);margin:4px 0 2px;background:linear-gradient(180deg,#fff,#ffd6f0 50%,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.podium{display:grid;grid-template-columns:1fr 1.15fr 1fr;align-items:end;gap:8px;margin:14px 0 6px}
+.pod{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+.pod canvas{width:76px;height:76px}
+.pod.p1 canvas{width:100px;height:100px}
+.pod .pn{font-weight:900;font-size:13px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pod .pk{font-size:11px;color:var(--muted)}
+.pod .ps{width:100%;border-radius:14px 14px 5px 5px;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:22px;color:#3a1440;
+  background:linear-gradient(180deg,#f4ecff,#b9a7d6)}
+.pod.p1 .ps{height:74px;background:linear-gradient(180deg,#fff0c2,var(--gold) 55%,#f0a640);box-shadow:0 10px 30px rgba(240,166,64,.35)}
+.pod.p2 .ps{height:54px}.pod.p3 .ps{height:42px;background:linear-gradient(180deg,#ffd0e8,#e488b8)}
+.mvp{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:10px 0}
+.mvp span{font-size:12px;padding:6px 10px;border-radius:20px;background:rgba(255,255,255,.06);border:1px solid var(--line2);color:#f4e8fb}
+#reEarn{display:none;margin:8px auto 10px;padding:10px 14px;border-radius:16px;max-width:420px;background:linear-gradient(180deg,rgba(255,210,122,.18),rgba(255,210,122,.06));border:1px solid rgba(255,210,122,.45);font-size:13px;color:#fff1d6;line-height:1.6}
+#reEarn b{font-family:var(--display);font-size:22px;color:var(--gold);display:block}
+#reTable{width:100%;border-collapse:collapse;margin:6px 0 12px;font-size:13px}
+#reTable td,#reTable th{padding:7px 6px;text-align:left;border-bottom:1px solid var(--line)}
+#reTable th{color:var(--muted);font-weight:800;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+#reTable td:not(:nth-child(2)),#reTable th:not(:nth-child(2)){text-align:center}
+#reTable tr.me td{color:var(--pink);font-weight:900}
+#reTable .c{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:0}
+#reNext{margin:4px 0 12px}
+#toast{position:fixed;left:50%;top:max(16px,env(safe-area-inset-top));transform:translateX(-50%) translateY(-160%);background:var(--glass2);color:var(--text);
+  padding:12px 18px;border-radius:18px;z-index:40;transition:transform .35s cubic-bezier(.2,.9,.25,1.2);font-weight:900;box-shadow:var(--shadow);max-width:92vw;text-align:center;
+  border:1px solid rgba(255,122,200,.45);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+#toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body class="scr-menu">
+<canvas id="demo"></canvas>
+<div id="veil"></div>
+<div id="sparkles"></div>
+
+<!-- Логотип: фея-звёздочка с крылышками -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="gWing" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#ffc4ea"/><stop offset="1" stop-color="#c58bff"/></linearGradient>
+    <linearGradient id="gStar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff6d6"/><stop offset=".55" stop-color="#ffd27a"/><stop offset="1" stop-color="#f39a3e"/></linearGradient>
+    <symbol id="fairySym" viewBox="0 0 64 64">
+      <path d="M31 30 C20 10 4 10 6 22 C7 31 18 33 31 31Z" fill="url(#gWing)" opacity=".92"/>
+      <path d="M33 30 C44 10 60 10 58 22 C57 31 46 33 33 31Z" fill="url(#gWing)" opacity=".92"/>
+      <path d="M31 33 C20 40 10 50 16 54 C22 57 29 46 31 35Z" fill="url(#gWing)" opacity=".75"/>
+      <path d="M33 33 C44 40 54 50 48 54 C42 57 35 46 33 35Z" fill="url(#gWing)" opacity=".75"/>
+      <path d="M32 14 L35.5 25 L47 25 L37.8 31.8 L41.3 43 L32 36 L22.7 43 L26.2 31.8 L17 25 L28.5 25Z" fill="url(#gStar)" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/>
+      <circle cx="29" cy="28" r="1.7" fill="#5a2a48"/><circle cx="35" cy="28" r="1.7" fill="#5a2a48"/>
+      <path d="M29.5 32 Q32 34.5 34.5 32" fill="none" stroke="#5a2a48" stroke-width="1.3" stroke-linecap="round"/>
+      <circle cx="27" cy="31" r="1.6" fill="#ff7ab8" opacity=".6"/><circle cx="37" cy="31" r="1.6" fill="#ff7ab8" opacity=".6"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div id="corner">
+  <span class="purse" id="purse">💎 0</span>
+  <button class="ibtn" id="btnQuest" title="Задания дня" aria-label="Задания дня">📅<span class="dot" id="questDot"></span></button>
+  <button class="ibtn" id="btnAch" title="Достижения" aria-label="Достижения">🏆</button>
+</div>
+<div id="ver"></div>
+
+<!-- ============ 1 — фея ============ -->
+<div id="menu" class="screen active">
+  <div class="steps"><div class="step on"><i>1</i>Фея</div><div class="bar"></div><div class="step"><i>2</i>Режим</div><div class="bar"></div><div class="step"><i>3</i>Полёт</div></div>
+  <div class="logo">
+    <svg viewBox="0 0 64 64"><use href="#fairySym"/></svg>
+    <div><div class="logo-word">Феи</div><div class="logo-sub">ВОЛШЕБНЫЙ САД</div></div>
+  </div>
+  <div class="panel" style="margin-top:20px">
+    <div class="fairy">
+      <div class="stage"><canvas id="preview" width="420" height="420"></canvas></div>
+      <div class="fcol">
+        <label class="lbl">Имя феи<input id="playerName" type="text" maxlength="14" placeholder="Как тебя зовут?" autocomplete="off"></label>
+        <div class="lbl">Цвет<div id="swatches" class="swatches"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="row" style="justify-content:space-between;margin-bottom:12px"><h3 style="margin:0">✨ Волшебный бутик</h3><span class="purse" id="purse2">💎 0</span></div>
+    <div class="tabs" id="tabs"></div>
+    <div class="items" id="items"></div>
+  </div>
+  <div class="netStatus"></div>
+  <button class="btn primary cta wide" id="btnNext">Далее</button>
+</div>
+
+<!-- ============ 2 — режим ============ -->
+<div id="modes" class="screen">
+  <div class="steps"><div class="step done"><i>✓</i>Фея</div><div class="bar"></div><div class="step on"><i>2</i>Режим</div><div class="bar"></div><div class="step"><i>3</i>Полёт</div></div>
+  <h2 class="h-title">Где будем колдовать?</h2>
+  <p class="sub center">Вырасти самый большой сад! Одна с ботами или вместе с подругами — до 16 фей.</p>
+  <div class="modes">
+    <button class="mode" id="mSolo">
+      <div class="mi g">🌷</div>
+      <div><span class="mt">Против ботов</span><span class="md">Ты и феи-боты на одном устройстве. Без интернета, есть пауза.</span></div>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+    </button>
+    <button class="mode" id="mCreate">
+      <div class="mi b">💞</div>
+      <div><span class="mt">Играть с подругами</span><span class="md">Создай сад и отправь ссылку. Свободные места займут боты.</span></div>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+    </button>
+    <div class="mode join">
+      <div class="mi v">🔑</div>
+      <div><span class="mt">Войти по коду</span><span class="md">Подруга уже создала игру? Введи код из 6 символов.</span></div>
+      <div class="joinrow"><input id="joinId" type="text" maxlength="6" placeholder="КОД" autocapitalize="characters" autocomplete="off"><button class="btn primary" id="btnJoin">Войти</button></div>
+    </div>
+  </div>
+  <div class="netStatus"></div>
+  <details class="panel">
+    <summary>⚙️ Настройки сада</summary>
+    <div class="grid">
+      <label class="lbl">Фей в саду<select id="optSize">
+        <option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6</option>
+        <option value="8">8</option><option value="10">10</option><option value="12">12</option><option value="16">16</option></select></label>
+      <label class="lbl">Боты<select id="optDiff"><option value="easy">нежные</option><option value="normal" selected>ловкие</option><option value="hard">хитрые</option></select></label>
+      <label class="lbl">Раунд<select id="optTime"><option value="90">1,5 минуты</option><option value="150" selected>2,5 минуты</option><option value="210">3,5 минуты</option></select></label>
+      <label class="lbl">Матч<select id="optWins"><option value="0">без конца</option><option value="3">до 3 побед</option><option value="5">до 5 побед</option></select></label>
+    </div>
+    <div style="margin-top:14px">
+      <label class="chk"><input type="checkbox" id="optBots" checked>Боты на свободных местах</label>
+      <label class="chk"><input type="checkbox" id="optPowers" checked>Волшебные бонусы</label>
+      <label class="chk"><input type="checkbox" id="optPonds" checked>Пруды</label>
+    </div>
+  </details>
+  <details class="panel">
+    <summary>📡 Связь для онлайн-игры</summary>
+    <div id="serverInfo"></div>
+    <select id="netVia"><option value="p2p">Напрямую (P2P) — через интернет</option><option value="ws">Через сервер на компьютере (Wi-Fi)</option></select>
+    <div class="row" id="serverRow" style="margin-top:10px;display:grid;grid-template-columns:1fr auto"><input id="serverIp" type="text" placeholder="192.168.1.5:8767"><button class="btn" id="btnSaveServer">Сохранить</button></div>
+  </details>
+  <button class="btn ghost wide" id="btnBackChar">← Моя фея</button>
+</div>
+
+<!-- ============ 3 — правила на фоне живого сада ============ -->
+<div id="rules" class="screen">
+  <div class="rulesBox panel">
+    <div class="steps"><div class="step done"><i>✓</i>Фея</div><div class="bar"></div><div class="step done"><i>✓</i>Режим</div><div class="bar"></div><div class="step on"><i>3</i>Полёт</div></div>
+    <h2 class="h-title" id="rulesTitle"></h2>
+    <p class="sub center" id="rulesSub"></p>
+    <ul class="rules">
+      <li><span class="ri">🧚</span><span><b>Фея летит сама</b> — ты выбираешь, куда. Телефон: веди пальцем, джойстик появится под ним. Компьютер: мышь или WASD.</span></li>
+      <li><span class="ri">🌸</span><span><b>Вылетай из своего сада</b> — за тобой тянется дорожка из лепестков. <b>Вернись домой</b> — всё, что ты обвела, расцветёт твоими цветами!</span></li>
+      <li><span class="ri">🪄</span><span><b>Коснись чужой дорожки</b> — та фея заснёт и проснётся у себя дома без дорожки. Береги свою: не улетай далеко, когда рядом соперницы.</span></li>
+      <li><span class="ri">✨</span><span><b>Вспышка</b> — короткий рывок (кнопка справа, пробел или клик). Бонусы: 🦋 скорость, 🫧 пузырь-защита, 🌈 радуга, ❄️ иней.</span></li>
+      <li><span class="ri">🌹</span><span>В середине раунда расцветает <b>волшебная роза</b>, а потом начинается <b>звездопад</b> — собирай 💎 кристаллы для бутика.</span></li>
+      <li><span class="ri">👑</span><span>Когда время выйдет, побеждает фея с <b>самым большим садом</b>. Больше половины сада — победа сразу!</span></li>
+    </ul>
+  </div>
+  <div class="rulesBottom">
+    <div class="netStatus"></div>
+    <div class="row"><button class="btn" id="btnRulesBack">←</button><button class="btn primary cta" id="btnFight">ПОЛЕТЕЛИ!</button></div>
+  </div>
+</div>
+
+<div id="achBox" class="modal"><div class="sheet">
+  <h2>Достижения</h2>
+  <p class="sub center" style="margin:0">Особые наряды открываются только здесь</p>
+  <div id="progress"></div>
+  <div class="row center" style="margin-top:16px"><button class="btn primary" id="btnAchClose">Готово</button></div>
+</div></div>
+<div id="questBox" class="modal"><div class="sheet">
+  <h2>Задания дня</h2>
+  <p class="sub center" style="margin:0" id="questSub">Новые задания — каждый день</p>
+  <div id="quests" class="list" style="margin-top:14px"></div>
+  <div class="row center" style="margin-top:16px"><button class="btn primary" id="btnQuestClose">Хорошо</button></div>
+</div></div>
+<div id="buyBox" class="modal"><div class="sheet center">
+  <canvas id="buyPrev" width="300" height="300"></canvas>
+  <h2 id="buyTitle"></h2>
+  <p class="sub" id="buyText" style="margin:6px 0 14px"></p>
+  <div class="row center"><button class="btn gold" id="btnBuy">Купить</button><button class="btn" id="btnBuyCancel">Не сейчас</button></div>
+</div></div>
+
+<!-- ============ Комната ============ -->
+<div id="lobby" class="screen">
+  <div class="logo small" style="margin-top:50px"><svg viewBox="0 0 64 64"><use href="#fairySym"/></svg><div class="logo-word">Сад друзей</div></div>
+  <div class="panel center">
+    <h3>Код игры</h3>
+    <div class="code" id="gameIdBox"></div>
+    <div id="linkBox">
+      <div id="joinLink"></div>
+      <div class="row center"><button class="btn primary" id="btnCopy">Копировать ссылку</button><button class="btn" id="btnShare">Поделиться</button></div>
+    </div>
+    <p class="sub" style="margin:12px 0 0;font-size:12px">Связь: <span id="serverShow"></span></p>
+  </div>
+  <div class="panel tip" id="hostTip" style="display:none">
+    📌 <b>Твоё устройство — сервер этой игры.</b> Отправь ссылку и <b>сразу вернись сюда</b>: пока ты в мессенджере, телефон «замораживает» браузер,
+    и подруги не могут подключиться. Не открывай ссылку на этом же телефоне — открывай её на другом.
+    <div id="hostTries"></div>
+  </div>
+  <div class="panel">
+    <h3>Феи</h3>
+    <div id="slotList"></div>
+    <p class="sub" id="lobbyHint" style="margin:14px 0 0;font-size:13px"></p>
+  </div>
+  <div class="netStatus"></div>
+  <button class="btn primary cta wide" id="btnStart">Начать!</button>
+  <button class="btn ghost wide" id="btnLobbyBack" style="margin-top:10px">← В меню</button>
+</div>
+
+<!-- ============ Полёт ============ -->
+<div id="game" class="screen">
+  <canvas id="cv"></canvas>
+  <div id="topBtns">
+    <button class="ibtn" id="btnPause" title="Пауза"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg></button>
+    <button class="ibtn" id="btnEmote" title="Фразы"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></button>
+    <button class="ibtn" id="btnMusic" title="Музыка"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></button>
+    <button class="ibtn" id="btnSound" title="Звук"></button>
+    <button class="ibtn" id="btnFull" title="Во весь экран"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    <button class="ibtn" id="btnExit" title="Выйти"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div id="emotes"></div>
+  <button id="btnFlash" aria-label="Вспышка"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1.5l2.6 6.9 7.3.4-5.7 4.6 1.9 7.1L12 16.5l-6.1 4 1.9-7.1L2.1 8.8l7.3-.4z"/></svg></button>
+  <div id="roundEnd"><div class="sheet">
+    <div class="re-kicker" id="reKicker"></div>
+    <h2 id="reTitle"></h2>
+    <div id="reSub" class="sub" style="margin:0"></div>
+    <div class="podium" id="rePodium"></div>
+    <div class="mvp" id="reMvp"></div>
+    <div id="reEarn"></div>
+    <table id="reTable"></table>
+    <div id="reNext" class="sub"></div>
+    <div class="row center"><button class="btn primary" id="btnRestart">Новый матч</button><button class="btn" id="btnCard">📸 Открытка</button><button class="btn" id="btnReHide">Смотреть</button><button class="btn" id="btnReMenu">В меню</button></div>
+  </div></div>
+  <div id="pauseBox"><div class="sheet center">
+    <div class="re-kicker">Игра на паузе</div>
+    <h2 style="margin:8px 0 16px">Пауза</h2>
+    <div class="row center"><button class="btn primary" id="btnResume">Продолжить</button><button class="btn" id="btnPauseMenu">В меню</button></div>
+  </div></div>
+</div>
+<div id="toast"></div>
+
+<script src="room.js"></script>
+<script src="game.js"></script>
+<script src="net.js"></script>
+</body>
+</html>

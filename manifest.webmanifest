@@ -1,0 +1,16 @@
+{
+  "name": "Феи — волшебный сад",
+  "short_name": "Феи",
+  "description": "Летай, рисуй дорожки из лепестков и выращивай самый большой волшебный сад вместе с подругами",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "background_color": "#1a0d2e",
+  "theme_color": "#1a0d2e",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
